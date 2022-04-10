@@ -1,2 +1,7 @@
-lst = 'aaprrrrpaa'
-print(lst.find('prrrrp'))
+import time
+
+x = time.time()
+
+y = time.time()
+
+print(y-x)
