@@ -1,0 +1,3 @@
+- Cần sửa func get_points.
+- Chỉnh thành min-max
+- Sử dụng alpha-beta
