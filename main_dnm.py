@@ -264,6 +264,7 @@ def best_move_func(board, depth , color):
     print(max_score)
     return max_move
 
+
 def minimax(board, depth , color, move_history, alpha, beta):
     score = evaluate_win_state(board, move_history)
     if(depth == 1):
