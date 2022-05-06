@@ -158,7 +158,7 @@ def get_points(lst,x,y):
 		if(lst.find(y+x+" "+x*3+y)) != -1:#'pr rrrp'
 			lst.replace(y+x+" "+x*3+y,y*2) 
 		if(lst.find(y+x*2+" "+x*2+y)) != -1:  #'prr rrp'
-			lst.replece(y+x*2+" "+r*2+y,y*2)
+			lst.replece(y+x*2+" "+x*2+y,y*2)
 		if(lst.find(y+x*3+y)) != -1 :  #'prrrp'
 			lst.replace(y+x*3+y,y*2)  
 		if(lst.find(y+x*2+y)) != -1: #'prrp'

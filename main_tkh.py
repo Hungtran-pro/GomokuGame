@@ -119,8 +119,8 @@ def possible_moves(board):
         taken: a list stores marked cell in the board (played by person and robot)
         direction: contains 8 directions
         cords: stores unmarked cell in the board
-
     '''
+    LENGTH_SIZE = [1]
     taken = []
     directions = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(-1,-1),(-1,1),(1,-1)]
     cord = []
@@ -134,7 +134,7 @@ def possible_moves(board):
         dx,dy = direction
         for coord in taken:
             x,y = coord
-            for length in [1]:
+            for length in LENGTH_SIZE:
                 move = march(board,x,y,dx,dy,length)
                 if move not in taken and move not in cord:
                     cord.append(move)
@@ -297,7 +297,7 @@ def minimax(board, depth , color, move_history, alpha, beta):
                     if alpha >= beta:
                         break
         return alpha
- 
+
     # If this minimizer's move
     else :
         best = inf
@@ -349,6 +349,7 @@ def click(x, y):
             print("Draw")
             win = True
             return
+
         rx, ry = best_move_func(board, 0, 'r')
         draw_circle(rx, ry, colors[robot])
         board[rx][ry] = robot
