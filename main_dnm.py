@@ -144,83 +144,50 @@ CONSTANT_LST = ['rrrrr','prrrrp', 'prrrr', 'rrrrp', 'rrrr', 'prrr', 'rrrp', 'rrr
 , 'rrr r', 'r rrr', 'rr rr', 'prrr rp', 'pr rrrp','prr rrp'
 , 'prr r', 'pr rr', 'r rrp', 'rr rp', 'prrp', 'prr', 'rrp', 'r']
 
-def get_points(lst):
-    total_point = 0
-    if lst.find('rrrrr') != -1:
-        return 100
-    elif(lst.find(' rrrr ') != -1):
-        return 90
-    else:
-        if(lst.find('prrrrp') != -1):
-            lst.replace('prrrrp', 'pp')
-        if(lst.find('prrr rp') != -1):
-            lst.replace('prrr rp', 'pp')
-        if(lst.find('pr rrrp') != -1):
-            lst.replace('pr rrrp', 'pp')
-        if(lst.find('prr rrp') != -1):
-            lst.replace('prr rrp', 'pp')
-        if(lst.find('prrrp') != -1):
-            lst.replace('prrrp', 'pp')
-        if(lst.find('prrp') != -1):
-            lst.replace('prrp', 'pp')
-        if(lst.find('prp') != -1):
-            lst.replace('prp', 'pp')
-        total_point = 5*lst.count(' rrr ') + 2*lst.count('rrr r') + 2*lst.count('r rrr') + 5*lst.count('rr rr') + 4*lst.count('rrrr') + 4*lst.count('rrr') + lst.count('rr')
-    return total_point
+def get_points(lst,x,y):
+	total_point=0
+	if lst.find(x*5) != -1: #rrrrr
+		return 100
+	elif lst.find(" "+x*4 + " ") != -1:  # ' rrrr ' 
+		return 90
+	else:
+		if(lst.find(y+x*4+y)) != -1:   #'prrrrp'
+			lst.replace(y+x*4+y,y*2)
+		if(lst.find(y+x*3+" "+x+y)) != -1: #'prrr rp'
+			lst.xeplace(y+x*3+" "+x+y,y*2)
+		if(lst.find(y+x+" "+x*3+y)) != -1:#'pr rrrp'
+			lst.replace(y+x+" "+x*3+y,y*2) 
+		if(lst.find(y+x*2+" "+x*2+y)) != -1:  #'prr rrp'
+			lst.replece(y+x*2+" "+r*2+y,y*2)
+		if(lst.find(y+x*3+y)) != -1 :  #'prrrp'
+			lst.replace(y+x*3+y,y*2)  
+		if(lst.find(y+x*2+y)) != -1: #'prrp'
+			lst.replace(y+x*2+y,y*2) 
+		if(lst.find(y+x+y)) != -1:  #'prp'
+			lst.replace(y+x+y,y*2)
+		total_point = 5*lst.count(" "+x*3+" ") + 2*lst.count(x*3+" "+x) + 2*lst.count(x+" "+x*3) + 5*lst.count(x*2+" "+x*2) + 4*lst.count(x*4) + 4*lst.count(x*3) + lst.count(x*2)
+	return total_point
 
-def get_points_anti(lst):
-    total_point = 0
-    if lst.find('ppppp') != -1:
-        return 100
-    elif lst.find(' pppp ') != -1:
-        return 90
-    else:
-        if(lst.find('rppppr') != -1):
-            lst.replace('rppppr', 'rr')
-        if(lst.find('rppp pr') != -1):
-            lst.replace('rppp pr', 'rr')
-        if(lst.find('rp pppr') != -1):
-            lst.replace('rp pppr', 'rr')
-        if(lst.find('rpp ppr') != -1):
-            lst.replace('rpp ppr', 'rr')
-        if(lst.find('rpppr') != -1):
-            lst.replace('rpppr', 'rr')
-        if(lst.find('rppr') != -1):
-            lst.replace('rppr', 'rr')
-        if(lst.find('rpr') != -1):
-            lst.replace('rpr', 'rr')
-        total_point = 5*lst.count(' ppp ') + 4*lst.count('ppp p') + 2*lst.count('p ppp') + 4*lst.count('pp pp') + 4*lst.count('pppp') + 3*lst.count('ppp') + lst.count('pp')
-    return total_point
 
-def score_of_cord_color(board,x,y):
+def score_of_cord_color(board,x,y,status):
     '''
     Return maximum points for the move (x, y)
     '''
+    if(status=='attack'):
+        p1,p2 = 'r','p'
+    else:
+        p1,p2= 'p','r'
     score = 0
-    score = score +  get_points(''.join(get_list(board,march(board,x,y,0,-1,4), 0, 1,march(board,x,y,0,1,4))))
+    score = score +  get_points(''.join(get_list(board,march(board,x,y,0,-1,4), 0, 1,march(board,x,y,0,1,4))),p1,p2)
     
-    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,0,4), 1, 0,march(board,x,y,1,0,4))))
+    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,0,4), 1, 0,march(board,x,y,1,0,4))),p1,p2)
     
-    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,-1,4), 1, 1,march(board,x,y,1,1,4))))
+    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,-1,4), 1, 1,march(board,x,y,1,1,4))),p1,p2)
 
-    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,1,4), 1,-1,march(board,x,y,1,-1,4))))
+    score = score + get_points(''.join(get_list(board,march(board,x,y,-1,1,4), 1,-1,march(board,x,y,1,-1,4))),p1,p2)
     
     return score
 
-def score_of_cord_anticol(board,x,y):
-    '''
-    Return maximum points for the move (x, y)
-    '''
-    score = 0
-    score = score +  get_points_anti(''.join(get_list(board,march(board,x,y,0,-1,4), 0, 1,march(board,x,y,0,1,4))))
-    
-    score = score + get_points_anti(''.join(get_list(board,march(board,x,y,-1,0,4), 1, 0,march(board,x,y,1,0,4))))
-    
-    score = score + get_points_anti(''.join(get_list(board,march(board,x,y,-1,-1,4), 1, 1,march(board,x,y,1,1,4))))
-
-    score = score + get_points_anti(''.join(get_list(board,march(board,x,y,-1,1,4), 1,-1,march(board,x,y,1,-1,4))))
-    
-    return score
 
 def get_score(board,color,anticol,x,y):
     '''
@@ -229,10 +196,10 @@ def get_score(board,color,anticol,x,y):
 
     #Attack
     board[x][y] = color
-    score1 = score_of_cord_color(board,x,y)
+    score1 = score_of_cord_color(board,x,y,'attack')
     #Defence
     board[x][y] = anticol
-    score2 = score_of_cord_anticol(board,x,y)
+    score2 = score_of_cord_color(board,x,y,'defence')
     board[x][y] = ' '
     return max(score1, score2)
 
