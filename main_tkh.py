@@ -1,3 +1,4 @@
+from ast import Pass
 import turtle
 from cmath import inf 
 
@@ -47,7 +48,6 @@ def score_of_list(lst, color):
     '''
     blank = lst.count(' ')
     filled = lst.count(color)
-    
     if blank + filled < 5:
         return -1
     elif blank == 5:
@@ -228,9 +228,51 @@ def best_move_func(board, depth , color):
             if score_tmp > max_score:
                 max_score = score_tmp
                 max_move = move
-    print(max_score)
+    # print(max_score)
     return max_move
 
+MAX, MIN = 1000, -1000
+#Remember to set MAX, MIN = 1000, -1000 once call 'minimax' function
+
+def minimax(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+    if depth == 3:
+        pass
+        # return values[nodeIndex]
+        # return get_score()
+
+    if maximizingPlayer:
+        best = MIN
+        moves = possible_moves(board)
+        # for i in range(0, 2):
+        for move in moves:
+			
+            val = minimax(depth + 1, move, False, values, alpha, beta)
+            best = max(best, val)
+            alpha = max(alpha, best)
+
+			# Alpha Beta Pruning
+            if beta <= alpha:
+                break
+		
+        return best
+	
+    else:
+        best = MAX
+
+        # Recur for left and
+        # right children
+        for i in range(0, 2):
+
+            val = minimax(depth + 1, nodeIndex * 2 + i,
+                            True, values, alpha, beta)
+            best = min(best, val)
+            beta = min(beta, best)
+
+            # Alpha Beta Pruning
+            if beta <= alpha:
+                break
+
+        return best
 
 def minimax(board, depth , color, move_history, alpha, beta):
     score = evaluate_win_state(board, move_history)
@@ -307,6 +349,7 @@ def click(x, y):
         draw_circle(x, y, colors[person])
         board[x][y] = person
         move_history.append((x, y, person))
+        print(evaluate_win_state(board, move_history, person))
         if 5 == evaluate_win_state(board, move_history, person): # Check the state after person's move
             print("Person win!")
             win = True
@@ -321,6 +364,7 @@ def click(x, y):
         board[rx][ry] = robot
         move_history.append((rx, ry, robot))
 
+        print(evaluate_win_state(board, move_history, robot))
         if 5 == evaluate_win_state(board, move_history, robot): # Check the state after robot's move
             print("Robot win!")
             win = True

@@ -1,3 +1,7 @@
 - Cần sửa func get_points.
 - Chỉnh thành min-max
 - Sử dụng alpha-beta
+
+--------------------
+Để sử dụng alpha-beta (Cần đánh giá toàn bộ trạng thái bảng)
+-> Sử dụng hàm evaluate
