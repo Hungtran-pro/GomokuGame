@@ -1,5 +1,5 @@
-from ast import Pass
 import turtle
+import re
 from cmath import inf 
 
 def is_in_board(x, y, board):
@@ -42,12 +42,46 @@ def get_list(board,cord_s,dx,dy,cord_d):
         y += dy
     return lst
 
+def score_of_list_6(lst, c):
+    '''
+    Return value of the list corresponding to the color
+    '''
+    total_point=0
+    if c == 'p': a = 'r'
+    else: a = 'p'
+    if lst.find(c*5) != -1: #rrrrr
+        return 1000
+    elif lst.find(" "+c*4 + " ") != -1:  # ' rrrr ' 
+        return 1000
+    else:
+        lst = re.sub(f'{a}....{a}', '', lst)
+        lst = re.sub(f'{a}...{a}', '', lst)
+        lst = re.sub(f'{a}..{a}', '', lst)
+        lst = re.sub(f'{a}.{a}', '', lst)
+        lst = re.sub(f'{a}{a}', '', lst)
+        total_point = 7*lst.count("  "+c*3+" ") + 7*lst.count(" "+c*3+"  ") + 5*lst.count(" "+c*3+" ") + 5*lst.count(c*3+" "+c) + 5*lst.count(c+" "+c*3) + 5*lst.count(c*2+" "+c*2) + 3*lst.count(c*4) + 3*lst.count(c*3) + lst.count(c*2)
+    return total_point
+
+def score_of_list_5(lst, color):
+    '''
+    Return value of the list corresponding to the color
+    '''
+    blank = lst.count(' ')
+    filled = lst.count(color)
+    if blank + filled < 5:
+        return -1
+    elif blank == 5:
+        return 0
+    else:
+        return 1000
+
 def score_of_list(lst, color):
     '''
     Return value of the list corresponding to the color
     '''
     blank = lst.count(' ')
     filled = lst.count(color)
+    
     if blank + filled < 5:
         return -1
     elif blank == 5:
@@ -63,12 +97,21 @@ def score_of_full_list(board,cord_s,dx,dy,cord_d,color):
         dx, dy: direction moves
         color: indicate color of robot of person
     '''
+    # scores = []
+    # row = get_list(board,cord_s,dx,dy,cord_d)
+    # for start in range(len(row)-4):
+    #     score = score_of_list(row[start:start+5],color)
+    #     scores.append(score)
+    # return scores
     scores = []
     row = get_list(board,cord_s,dx,dy,cord_d)
-    for start in range(len(row)-4):
-        score = score_of_list(row[start:start+5],color)
-        scores.append(score)
     
+    if len(row) == 5:
+        scores.append(score_of_list_5(''.join(row), color))
+    else:
+        for start in range(len(row)-5):
+            score = score_of_list_6(''.join(row[start:start + 6]), color)
+            scores.append(score)
     return scores
 
 def summarize_score(score_dir):
@@ -154,11 +197,11 @@ def get_points(lst,x,y):
 		if(lst.find(y+x*4+y)) != -1:   #'prrrrp'
 			lst.replace(y+x*4+y,y*2)
 		if(lst.find(y+x*3+" "+x+y)) != -1: #'prrr rp'
-			lst.xeplace(y+x*3+" "+x+y,y*2)
+			lst.replace(y+x*3+" "+x+y,y*2)
 		if(lst.find(y+x+" "+x*3+y)) != -1:#'pr rrrp'
 			lst.replace(y+x+" "+x*3+y,y*2) 
 		if(lst.find(y+x*2+" "+x*2+y)) != -1:  #'prr rrp'
-			lst.replece(y+x*2+" "+x*2+y,y*2)
+			lst.replace(y+x*2+" "+x*2+y,y*2)
 		if(lst.find(y+x*3+y)) != -1 :  #'prrrp'
 			lst.replace(y+x*3+y,y*2)  
 		if(lst.find(y+x*2+y)) != -1: #'prrp'
@@ -231,10 +274,10 @@ def best_move_func(board, depth , color):
     # print(max_score)
     return max_move
 
-MAX, MIN = 1000, -1000
+MAX, MIN = 10000, -10000
 #Remember to set MAX, MIN = 1000, -1000 once call 'minimax' function
 
-def minimax(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+def alpha_beta(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
     if depth == 3:
         pass
         # return values[nodeIndex]
@@ -349,8 +392,7 @@ def click(x, y):
         draw_circle(x, y, colors[person])
         board[x][y] = person
         move_history.append((x, y, person))
-        print(evaluate_win_state(board, move_history, person))
-        if 5 == evaluate_win_state(board, move_history, person): # Check the state after person's move
+        if 1000 == evaluate_win_state(board, move_history, person): # Check the state after person's move
             print("Person win!")
             win = True
             return
@@ -364,8 +406,7 @@ def click(x, y):
         board[rx][ry] = robot
         move_history.append((rx, ry, robot))
 
-        print(evaluate_win_state(board, move_history, robot))
-        if 5 == evaluate_win_state(board, move_history, robot): # Check the state after robot's move
+        if 1000 == evaluate_win_state(board, move_history, robot): # Check the state after robot's move
             print("Robot win!")
             win = True
             return
