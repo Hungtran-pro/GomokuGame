@@ -51,8 +51,12 @@ def score_of_list_6(lst, c):
     else: a = 'p'
     if lst.find(c*5) != -1: #rrrrr
         return 1000
-    elif lst.find(" "+c*4 + " ") != -1:  # ' rrrr ' 
+    elif lst.find(" " + c*4 + " ") != -1:  # ' rrrr ' 
         return 1000
+    elif lst.find(c*4 + " ") != -1:  # ' rrrr ' 
+        return 500
+    elif lst.find(c*4 + " ") != -1:  # ' rrrr ' 
+        return 500
     else:
         lst = re.sub(f'{a}....{a}', '', lst)
         lst = re.sub(f'{a}...{a}', '', lst)
@@ -125,7 +129,7 @@ def summarize_score(score_dir):
         score_max = max(score_max, score_max_tmp)
     return score_max
 
-def evaluate_win_state(board, move_history, color):
+def evaluate_win_state(board, color):
     '''
     Evaluate the current state of the board (WIN or KEEP PLAYING)
     '''
@@ -258,7 +262,7 @@ def best_move_func(board, depth , color):
     else: anticol = 'p'
 
     max_move = (0,0)
-    max_score = 0
+    max_score = -10000
     moves = possible_moves(board)
     for move in moves:
         x,y = move
@@ -271,105 +275,76 @@ def best_move_func(board, depth , color):
             if score_tmp > max_score:
                 max_score = score_tmp
                 max_move = move
-    # print(max_score)
     return max_move
 
 MAX, MIN = 10000, -10000
+
+def refresh_MAX_MIN():
+    global MAX, MIN
+    MAX = 10000
+    MIN = -10000
+    return MAX, MIN
 #Remember to set MAX, MIN = 1000, -1000 once call 'minimax' function
 
-def alpha_beta(depth, nodeIndex, maximizingPlayer, values, alpha, beta):
+VALUE_PLAYER = {
+    'r': 1,
+    'p': -1
+}
+
+def minimax(depth, maximizingPlayer, board, alpha, beta, color):
+
+    global MIN, MAX
+    anti_color = 'p' if color == 'r' else 'r'
+    if depth == 0:
+        refresh_MAX_MIN()
+
     if depth == 3:
-        pass
-        # return values[nodeIndex]
-        # return get_score()
+        # * Return evaluated value and fake move
+        return (0,0), evaluate_win_state(board, color) * VALUE_PLAYER[color] + evaluate_win_state(board, anti_color) * VALUE_PLAYER[color]
 
     if maximizingPlayer:
+        best_move = (0,0)
         best = MIN
         moves = possible_moves(board)
-        # for i in range(0, 2):
+        print(f"Possible move: {len(moves)}")
+        #Loop through possible moves
         for move in moves:
-			
-            val = minimax(depth + 1, move, False, values, alpha, beta)
-            best = max(best, val)
+            x, y = move
+            board[x][y] = color
+            _, val = minimax(depth + 1, False, board, alpha, beta, anti_color)
+            # best = max(best, val)
+            if(val > best):
+                best_move = move
+                best = val
             alpha = max(alpha, best)
-
+            board[x][y] = ' '
 			# Alpha Beta Pruning
             if beta <= alpha:
                 break
 		
-        return best
+        return best_move, best
 	
     else:
+        best_move = (0,0)
         best = MAX
+        moves = possible_moves(board)
 
-        # Recur for left and
-        # right children
-        for i in range(0, 2):
-
-            val = minimax(depth + 1, nodeIndex * 2 + i,
-                            True, values, alpha, beta)
-            best = min(best, val)
+        #Loop through possible moves
+        for move in moves:
+            x, y = move
+            board[x][y] = color
+            _, val = minimax(depth + 1, True, board, alpha, beta, anti_color)
+            # best = min(best, val)
+            if(val < best):
+                best_move = move
+                best = val
             beta = min(beta, best)
-
+            board[x][y] = ' '
             # Alpha Beta Pruning
             if beta <= alpha:
                 break
 
-        return best
-
-def minimax(board, depth , color, move_history, alpha, beta):
-    score = evaluate_win_state(board, move_history)
-    if(depth == 1):
-        return score
-
-    # If robot or player has won the game return the evaluated score
-    if (score == 25) :
-        return score
-    if (score == -25) :
-        return score
-    # If there are no more moves and no winner then it is a tie
-    if (is_empty_board(board)):
-        return score
-    # If this robot's move
-    dir = [(0,1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
-    if (color == 'r') :    
-        best = -inf
-        for moved_history in move_history:
-            for i in range(len(dir)):
-                cur_x = moved_history[0] + dir[i][0]
-                cur_y = moved_history[1] + dir[i][1]
-                # Check if cell is empty
-                if (board[cur_x][cur_y]==' ') :
-                    board[cur_x][cur_y] = 'r'
-                    move_history.append((cur_x, cur_y, 'r'))
-                    best = max(best, minimax(board,depth + 1,'p',move_history, alpha, beta))
-                    alpha = max(best, alpha)
-                    board[cur_x][cur_y] = ' '
-                    move_history.pop()
-                    if alpha >= beta:
-                        break
-        return alpha
- 
-    # If this minimizer's move
-    else :
-        best = inf
-        for moved_history in move_history:
-            for i in range(len(dir)):
-                cur_x = moved_history[0] + dir[i][0]
-                cur_y = moved_history[1] + dir[i][1]
-                # Check if cell is empty
-                if (board[cur_x][cur_y]==' '):
-                    board[cur_x][cur_y] = 'p'
-                    move_history.append((cur_x, cur_y, 'p'))
-                    best = min(best, minimax(board,depth + 1,'r',move_history, alpha, beta))
-                    beta = min(best, beta)
-                    board[cur_x][cur_y] = ' '
-                    move_history.pop()
-                    if alpha >= beta:
-                        break
-        return beta
-    return 0
-
+        return best_move, best
 
 def click(x, y):
     '''
@@ -392,7 +367,7 @@ def click(x, y):
         draw_circle(x, y, colors[person])
         board[x][y] = person
         move_history.append((x, y, person))
-        if 1000 == evaluate_win_state(board, move_history, person): # Check the state after person's move
+        if 1000 == evaluate_win_state(board, person): # Check the state after person's move
             print("Person win!")
             win = True
             return
@@ -401,12 +376,15 @@ def click(x, y):
             print("Draw")
             win = True
             return
-        rx, ry = best_move_func(board, 0, 'r')
+        # rx, ry = best_move_func(board, 0, 'r')
+
+        best_move, value = minimax(0, True, board, MIN, MAX, robot)
+        rx, ry = best_move
         draw_circle(rx, ry, colors[robot])
         board[rx][ry] = robot
         move_history.append((rx, ry, robot))
 
-        if 1000 == evaluate_win_state(board, move_history, robot): # Check the state after robot's move
+        if 1000 == evaluate_win_state(board, robot): # Check the state after robot's move
             print("Robot win!")
             win = True
             return

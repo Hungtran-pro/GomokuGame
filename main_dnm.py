@@ -1,25 +1,32 @@
 import turtle
+import re
 from cmath import inf 
 
 def is_in_board(x, y, board):
     '''
-    Check whether the clicked position is in board or not
+    Check whether the clicked position is in board or not?
     '''
     return 0 <= x <= len(board) - 1 and 0 <= y <= len(board) - 1
 
 def is_empty_board(board):
     '''
-    Check whether the board is empty or not
+    Check whether the board is empty or not?
     '''
     return board == ([[' '] * len(board)] * len(board))
 
 def is_full_filled_board(board):
+    '''
+    Check whether the board is fullu filled or not?
+    '''
     for i in range(len(board)):
         if " " in board[i]:
             return False
     return True
 
 def make_board(size):
+    '''
+    Make a new empty board.
+    '''
     board = []
     for i in range(size):
         board.append([" "]*size)
@@ -140,34 +147,25 @@ def possible_moves(board):
                     cord.append(move)
     return cord
 
-CONSTANT_LST = ['rrrrr','prrrrp', 'prrrr', 'rrrrp', 'rrrr', 'prrr', 'rrrp', 'rrr'
-, 'rrr r', 'r rrr', 'rr rr', 'prrr rp', 'pr rrrp','prr rrp'
-, 'prr r', 'pr rr', 'r rrp', 'rr rp', 'prrp', 'prr', 'rrp', 'r']
-
 def get_points(lst,x,y):
-	total_point=0
-	if lst.find(x*5) != -1: #rrrrr
-		return 100
-	elif lst.find(" "+x*4 + " ") != -1:  # ' rrrr ' 
-		return 90
-	else:
-		if(lst.find(y+x*4+y)) != -1:   #'prrrrp'
-			lst.replace(y+x*4+y,y*2)
-		if(lst.find(y+x*3+" "+x+y)) != -1: #'prrr rp'
-			lst.xeplace(y+x*3+" "+x+y,y*2)
-		if(lst.find(y+x+" "+x*3+y)) != -1:#'pr rrrp'
-			lst.replace(y+x+" "+x*3+y,y*2) 
-		if(lst.find(y+x*2+" "+x*2+y)) != -1:  #'prr rrp'
-			lst.replece(y+x*2+" "+x*2+y,y*2)
-		if(lst.find(y+x*3+y)) != -1 :  #'prrrp'
-			lst.replace(y+x*3+y,y*2)  
-		if(lst.find(y+x*2+y)) != -1: #'prrp'
-			lst.replace(y+x*2+y,y*2) 
-		if(lst.find(y+x+y)) != -1:  #'prp'
-			lst.replace(y+x+y,y*2)
-		total_point = 5*lst.count(" "+x*3+" ") + 2*lst.count(x*3+" "+x) + 2*lst.count(x+" "+x*3) + 5*lst.count(x*2+" "+x*2) + 4*lst.count(x*4) + 4*lst.count(x*3) + lst.count(x*2)
-	return total_point
-
+    '''
+    Return total points of a cell with coordinates x, y
+    '''
+    total_point=0
+    if lst.find(x*5) != -1: #rrrrr
+        return 150
+    elif lst.find(" "+ x*4 + " ") != -1:  # ' rrrr ' 
+        return 120
+    else:
+        lst = re.sub(f'{y}....{y}', '', lst)
+        lst = re.sub(f'{y}...{y}', '', lst)
+        lst = re.sub(f'{y}..{y}', '', lst)
+        lst = re.sub(f'{y}.{y}', '', lst)
+        lst = re.sub(f'{y}{y}', '', lst)
+        total_point = 15*lst.count(" "+x*3+" ") + 2*lst.count(x*3+" "+x) \
+            + 2*lst.count(x+" "+x*3) + 5*lst.count(x*2+" "+x*2) \
+            + 5*lst.count(x*4) + 4*lst.count(x*3) + lst.count(x*2) + lst.count(x+" "+x) + 0.5*lst.count(x+"  "+x) 
+    return total_point
 
 def score_of_cord_color(board,x,y,status):
     '''
@@ -201,7 +199,8 @@ def get_score(board,color,anticol,x,y):
     board[x][y] = anticol
     score2 = score_of_cord_color(board,x,y,'defence')
     board[x][y] = ' '
-    return max(score1, score2)
+    return score1 + score2
+    # return max(score1, score2)
 
 def best_move_func(board, depth , color):
     '''
@@ -231,64 +230,9 @@ def best_move_func(board, depth , color):
     print(max_score)
     return max_move
 
-
-def minimax(board, depth , color, move_history, alpha, beta):
-    score = evaluate_win_state(board, move_history)
-    if(depth == 1):
-        return score
-
-    # If robot or player has won the game return the evaluated score
-    if (score == 25) :
-        return score
-    if (score == -25) :
-        return score
-    # If there are no more moves and no winner then it is a tie
-    if (is_empty_board(board)):
-        return score
-    # If this robot's move
-    dir = [(0,1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
-    if (color == 'r') :    
-        best = -inf
-        for moved_history in move_history:
-            for i in range(len(dir)):
-                cur_x = moved_history[0] + dir[i][0]
-                cur_y = moved_history[1] + dir[i][1]
-                # Check if cell is empty
-                if (board[cur_x][cur_y]==' ') :
-                    board[cur_x][cur_y] = 'r'
-                    move_history.append((cur_x, cur_y, 'r'))
-                    best = max(best, minimax(board,depth + 1,'p',move_history, alpha, beta))
-                    alpha = max(best, alpha)
-                    board[cur_x][cur_y] = ' '
-                    move_history.pop()
-                    if alpha >= beta:
-                        break
-        return alpha
- 
-    # If this minimizer's move
-    else :
-        best = inf
-        for moved_history in move_history:
-            for i in range(len(dir)):
-                cur_x = moved_history[0] + dir[i][0]
-                cur_y = moved_history[1] + dir[i][1]
-                # Check if cell is empty
-                if (board[cur_x][cur_y]==' '):
-                    board[cur_x][cur_y] = 'p'
-                    move_history.append((cur_x, cur_y, 'p'))
-                    best = min(best, minimax(board,depth + 1,'r',move_history, alpha, beta))
-                    beta = min(best, beta)
-                    board[cur_x][cur_y] = ' '
-                    move_history.pop()
-                    if alpha >= beta:
-                        break
-        return beta
-    return 0
-
-
 def click(x, y):
     '''
-    handle the process of clicking mouse
+    Handle the process of clicking mouse
     '''
 
     global colors, move_history, screen, win, result
@@ -328,11 +272,14 @@ def click(x, y):
 
 def getIndexPosition(x, y):
     '''
-    get coordinates of the clicked position of the mouse
+    Get coordinates of the clicked position of the mouse
     '''
     return round(x), round(y)
 
 def draw_circle(x, y, colturtle):
+    '''
+    Draw a circle at clicked cell
+    '''
     colturtle.goto(x,y-0.3)
     colturtle.pendown()
     colturtle.begin_fill()

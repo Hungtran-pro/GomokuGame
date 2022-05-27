@@ -1,2 +1,1 @@
-
-    #     return scores
++ 2*lst.count(x*3+" "+x) + 2*lst.count(x+" "+x*3) + 5*lst.count(x*2+" "+x*2) + 5
